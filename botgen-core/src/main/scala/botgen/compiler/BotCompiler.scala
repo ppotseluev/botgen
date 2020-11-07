@@ -1,9 +1,8 @@
 package botgen.compiler
 
 import botgen.bot.{BotDsl, BotError}
-import botgen.client.TelegramClient
 import botgen.dao.{BotScenarioDao, BotStateDao}
-import botgen.model.{BotInfo, Message}
+import botgen.model.BotInfo
 import botgen.service.ChatService
 import cats.syntax.applicativeError._
 import cats.syntax.functor._
