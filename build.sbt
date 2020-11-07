@@ -6,12 +6,19 @@ resolvers ++= Seq(
 )
 
 lazy val settings = Seq(
-  organization := "com.github.ppotseluev", //TODO ?
-  version := "1.0.0",
+  organization := "com.github.ppotseluev",
+  version := "1.0-SNAPSHOT",
   scalaVersion := "2.13.3",
   scalaSource in Compile := baseDirectory.value / "src/main/scala",
   scalaSource in Test := baseDirectory.value / "src/test/scala",
-  javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
+  javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
+  scalacOptions := Seq(
+    "-Ymacro-annotations",
+    "-language:higherKinds",
+    "-Xfatal-warnings",
+    "-deprecation"
+  ),
+  addCompilerPlugin(Dependency.kindProjector)
 )
 
 lazy val root = project
@@ -19,10 +26,11 @@ lazy val root = project
   .settings(
     name := "botgen",
     settings
-//    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test" TODO
   ).aggregate(
   `botgen-model`,
-  `botgen-bot`
+  `botgen-bot`,
+  `botgen-core`,
+  `botgen-api`
 )
 
 lazy val `botgen-model` = project
@@ -31,8 +39,7 @@ lazy val `botgen-model` = project
     settings,
     libraryDependencies ++= Seq(
       Dependency.tagging
-//      Dependency.catsCore
-    )//.map(_.withDottyCompat(scalaVersion.value))
+    )
   )
 
 lazy val `botgen-bot` = project
@@ -40,21 +47,36 @@ lazy val `botgen-bot` = project
     name := "botgen-bot",
     settings,
     libraryDependencies ++= Seq(
-      Dependency.scalaGraph
-    )//.map(_.withDottyCompat(scalaVersion.value))
+      Dependency.scalaGraph,
+      Dependency.catsCore,
+      Dependency.catsFree
+    )
   ).dependsOn(`botgen-model`)
+
+lazy val `botgen-core` = project
+  .settings(
+    name := "botgen-core",
+    settings,
+    libraryDependencies ++= Seq(
+      Dependency.sttpClientCore,
+      Dependency.sttpClientCirce,
+      Dependency.circeCore,
+      Dependency.circeGeneric,
+      Dependency.circeGenericExtras,
+      Dependency.doobieCore
+    )
+  ).dependsOn(`botgen-bot`)
 
 lazy val `botgen-api` = project
   .settings(
     name := "botgen-api",
     settings,
+    mainClass in assembly := Some("botgen.api.Main"),
     libraryDependencies ++= Seq(
-      Dependency.circeCore,
-      Dependency.circeGeneric,
       Dependency.tapirCore,
       Dependency.tapirJsonCirce,
-      Dependency.tapirHttp4s
-    )//.map(_.withDottyCompat(scalaVersion.value))
-  ).dependsOn(`botgen-model`)
-
-//todo DOT dep
+      Dependency.tapirHttp4s,
+      Dependency.scalaLogging,
+      Dependency.logback
+    )
+  ).dependsOn(`botgen-core`)
