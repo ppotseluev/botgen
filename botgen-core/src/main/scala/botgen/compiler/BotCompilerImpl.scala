@@ -16,13 +16,13 @@ class BotCompilerImpl[F[_]](botScenarioDao: BotScenarioDao[F],
 
   override def apply[A](botDsl: BotDsl[A]): F[A] = botDsl match {
     case BotDsl.LoadScenario(botKey) =>
-      botScenarioDao.get(botKey).map(_.asInstanceOf[A])
+      botScenarioDao.get(botKey)
     case BotDsl.GetCurrentState(chatId) =>
-      botStateDao.get(chatId).map(_.asInstanceOf[A])
+      botStateDao.get(chatId).map(_.map(_.botStateId))
     case BotDsl.SaveState(chatId, botStateId) =>
-      botStateDao.put(chatId, BotInfo(botStateId)).map(_.asInstanceOf[A])
+      botStateDao.put(chatId, BotInfo(botStateId))
     case BotDsl.Reply(botToken, chatId, message) =>
-      chatService.send(botToken)(chatId)(message).map(_.asInstanceOf[A])
+      chatService.send(botToken)(chatId)(message)
     case BotDsl.RaiseError(botError) =>
       botError match {
         case BotError.ScenarioNotFound =>
