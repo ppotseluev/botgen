@@ -1,7 +1,10 @@
 package botgen.model
 
-case class Message(payload: Message.Payload)
+case class Message(chatId: ChatId,
+                   payload: Message.Payload)
 
 object Message {
-  case class Payload(text: String, images: Seq[Image])
+
+  case class Payload(text: String, availableCommands: Seq[BotCommand])
+
 }
