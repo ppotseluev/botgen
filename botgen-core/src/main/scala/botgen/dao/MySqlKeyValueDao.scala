@@ -1,0 +1,64 @@
+package botgen.dao
+
+import cats.effect.Bracket
+import cats.instances.string._
+import cats.syntax.functor._
+import doobie.implicits._
+import doobie.util.transactor.Transactor
+import doobie.{Get, Put}
+import io.circe._
+
+import scala.reflect.runtime.universe.TypeTag
+
+class MySqlKeyValueDao[F[_], K, V: TypeTag](tableName: String,
+                                            transactor: Transactor[F])
+                                           (implicit keySchema: Schema.String[K],
+                                            valueSchema: Schema[V],
+                                            F: Bracket[F, Throwable])
+  extends KeyValueDao[F, K, V] {
+
+  import MySqlKeyValueDao._
+
+  private def putSql(key: K, value: V): doobie.Update0 =
+    sql"""
+         |INSERT INTO $tableName (
+         |  id,
+         |  value
+         |) VALUES (
+         |  $key,
+         |  $value
+         |) AS new(k, v)
+         | ON DUPLICATE KEY UPDATE
+         | value = v;
+        """.stripMargin
+      .update
+
+  private def getSql(key: K) =
+    sql"""
+         |SELECT value FROM $tableName
+         |WHERE id = $key;
+       """.stripMargin
+      .query[V]
+
+  override def put(key: K, value: V): F[Unit] =
+    putSql(key, value).run.transact(transactor).void
+
+  override def get(key: K): F[Option[V]] =
+    getSql(key)
+      .option
+      .transact(transactor)
+}
+
+object MySqlKeyValueDao {
+  private implicit def derivePut[T](implicit schema: Schema[T]): Put[T] = schema match {
+    case Schema.Json(codec) => Put[String].contramap(codec.apply(_).noSpaces)
+    case Schema.String(codec) => Put[String].contramap(codec.write)
+  }
+
+  private implicit def deriveGet[T: TypeTag](implicit schema: Schema[T]): Get[T] = schema match {
+    case Schema.Json(codec) => Get[String]
+      .temap(parser.parse(_).left.map(_.getMessage))
+      .temap(codec.decodeJson(_).left.map(_.getMessage))
+    case Schema.String(codec) => Get[String].temap(codec.read)
+  }
+}

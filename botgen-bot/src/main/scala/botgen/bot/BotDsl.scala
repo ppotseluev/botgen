@@ -19,7 +19,7 @@ object BotDsl {
 
   case class SaveState(chatId: ChatId, botStateId: BotStateId) extends BotDsl[Unit]
 
-  case class Reply(chatId: ChatId, message: Message.Payload) extends BotDsl[Unit]
+  case class Reply(botToken: BotToken, chatId: ChatId, message: Message.Payload) extends BotDsl[Unit]
 
   case class RaiseError(botError: BotError) extends BotDsl[Unit]
 
@@ -32,8 +32,8 @@ object BotDsl {
   def saveState(chatId: ChatId, botStateId: BotStateId): BotScript[Unit] =
     liftF(SaveState(chatId, botStateId))
 
-  def reply(chatId: ChatId, message: Message.Payload): BotScript[Unit] =
-    liftF(Reply(chatId, message))
+  def reply(botToken: BotToken, chatId: ChatId, message: Message.Payload): BotScript[Unit] =
+    liftF(Reply(botToken, chatId, message))
 
   def raiseError(botError: BotError): BotScript[Unit] =
     liftF(RaiseError(botError))

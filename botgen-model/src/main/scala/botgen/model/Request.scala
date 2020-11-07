@@ -3,6 +3,8 @@ package botgen.model
 sealed trait Request
 
 object Request {
-  case class ProcessMessage(botKey: BotKey,
-                            message: Message) extends Request
+  case class ProcessMessage(botToken: BotToken,
+                            message: Message) extends Request {
+    def botKey: BotKey = ??? //TODO hash botToken
+  }
 }

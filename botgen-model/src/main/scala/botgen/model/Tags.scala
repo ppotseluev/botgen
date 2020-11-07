@@ -5,4 +5,5 @@ object Tags {
   trait BotStateId
   trait BotCommand
   trait BotKey
+  trait BotToken
 }

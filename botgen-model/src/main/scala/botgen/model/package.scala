@@ -7,4 +7,5 @@ package object model {
   type BotStateId = String @@ Tags.BotStateId
   type BotCommand = String @@ Tags.BotCommand
   type BotKey = String @@ Tags.BotKey
+  type BotToken = String @@ Tags.BotToken
 }
