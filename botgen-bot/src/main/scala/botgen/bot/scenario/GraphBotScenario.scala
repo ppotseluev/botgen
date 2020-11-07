@@ -1,6 +1,6 @@
 package botgen.bot.scenario
 
-import botgen.bot.scenario.GraphBotScenario.BotGraph
+import botgen.bot.scenario.GraphBotScenario.{BotGraph, Node}
 import botgen.bot.{Action, BotState}
 import botgen.model.{BotCommand, BotStateId, Message, Tags}
 import com.softwaremill.tagging._
@@ -9,8 +9,8 @@ import scalax.collection.edge.LBase.LEdgeImplicits
 import scalax.collection.edge.LDiEdge
 
 
-class GraphBotScenario(graph: BotGraph,
-                      override val startFrom: BotStateId)
+class GraphBotScenario(val graph: BotGraph,
+                       override val startFrom: BotStateId)
   extends Scenario {
 
   import GraphBotScenario.EdgeImplicits._
@@ -60,4 +60,5 @@ object GraphBotScenario {
   type BotGraph = Graph[Node, LDiEdge]
 
   object EdgeImplicits extends LEdgeImplicits[EdgeLabel]
+
 }

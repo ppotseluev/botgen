@@ -1,5 +1,6 @@
-package botgen.dao
+package botgen.dao.impl
 
+import botgen.dao.{KeyValueDao, Schema}
 import cats.effect.Bracket
 import cats.instances.string._
 import cats.syntax.functor._
