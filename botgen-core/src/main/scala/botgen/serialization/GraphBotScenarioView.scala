@@ -9,19 +9,19 @@ import scalax.collection.edge.LDiEdge
 import GraphBotScenario.EdgeImplicits._
 
 case class GraphBotScenarioView(startFrom: BotStateId,
-                                nodes: Seq[Node],
-                                edges: Seq[Edge]) {
-  private lazy val nodesMap: Map[BotStateId, Node] =
-    nodes.map(node => node.id -> node).toMap
+                                states: Seq[Node],
+                                transitions: Seq[Edge]) {
+  private lazy val statesMap: Map[BotStateId, Node] =
+    states.map(node => node.id -> node).toMap
 
   def asModel: GraphBotScenario = {
-    val graph: BotGraph = Graph.from(nodes, edges.zipWithIndex.map((prepare _).tupled))
+    val graph: BotGraph = Graph.from(states, transitions.zipWithIndex.map((prepare _).tupled))
     new GraphBotScenario(graph, startFrom)
   }
 
   private def prepare(edge: Edge, order: Int): LDiEdge[Node] = {
     val label = EdgeLabel(order, edge.expectedInputPredicate)
-    LDiEdge(nodesMap(edge.from), nodesMap(edge.to))(label)
+    LDiEdge(statesMap(edge.from), statesMap(edge.to))(label)
   }
 }
 
@@ -34,8 +34,8 @@ object GraphBotScenarioView {
   def fromModel(model: GraphBotScenario): GraphBotScenarioView = {
     GraphBotScenarioView(
       startFrom = model.startFrom,
-      nodes = model.graph.nodes.map(_.value).toSeq,
-      edges = model.graph.edges
+      states = model.graph.nodes.map(_.value).toSeq,
+      transitions = model.graph.edges
         .toSeq
         .sortBy(_.order)
         .map { edge =>
