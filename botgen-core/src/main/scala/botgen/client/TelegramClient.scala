@@ -11,13 +11,29 @@ trait TelegramClient[F[_]] {
 }
 
 object TelegramClient {
+  implicit private val circeConfig: Configuration = Configuration.default.withSnakeCaseMemberNames
+
+  @ConfiguredJsonCodec
+  case class KeyboardButton(text: String)
+
+  object KeyboardButton {
+    implicit val keyboardButtonCodec: Codec[KeyboardButton] = deriveCodec
+  }
+
+  @ConfiguredJsonCodec
+  case class ReplyMarkup(keyboard: Option[Seq[Seq[KeyboardButton]]] = None,
+                         removeKeyboard: Option[Boolean] = None)
+
+  object ReplyMarkup {
+    implicit val keyboardCodec: Codec[ReplyMarkup] = deriveCodec
+  }
 
   @ConfiguredJsonCodec
   case class MessageSource(chatId: String,
-                           text: String)
+                           text: String,
+                           replyMarkup: Option[ReplyMarkup])
 
   object MessageSource {
-    implicit val circeConfig: Configuration = Configuration.default.withSnakeCaseMemberNames
     implicit val messageSourceCodec: Codec[MessageSource] = deriveCodec
   }
 

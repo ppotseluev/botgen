@@ -12,12 +12,13 @@ object HttpClientUtils {
   implicit class RichResponse[F[_], T](val responseF: F[Response[T]]) extends AnyVal {
 
     def checkStatusCode(isSuccess: StatusCode => Boolean = _.isSuccess)
-                       (implicit F: MonadError[F, Throwable]): F[Response[T]] =
+                       (implicit F: MonadError[F, Throwable],
+                       ev: T <:< Either[String, _]): F[Response[T]] =
       responseF.flatMap { response =>
         if (isSuccess(response.code))
           response.pure
         else
-          HttpCodeException(response.code.code, response.statusText).raiseError
+          HttpCodeException(response.code.code, response.body.left.getOrElse("")).raiseError
       }
   }
 

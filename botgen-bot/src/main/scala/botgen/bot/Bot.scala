@@ -34,7 +34,9 @@ class Bot(fallbackPolicy: FallbackPolicy) {
                       newState: BotState): BotScript[Unit] = for {
     _ <- saveState(request.message.chatId, newState.id)
     _ <- newState.action match {
-      case Action.Reply(payload) => reply(request.botToken, request.message.chatId, payload)
+      case Action.Reply(text) =>
+        val payload = Message.Payload(text, newState.availableCommands)
+        reply(request.botToken, request.message.chatId, payload)
     }
   } yield ()
 }
