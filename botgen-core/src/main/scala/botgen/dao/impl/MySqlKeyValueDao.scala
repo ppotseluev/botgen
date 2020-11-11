@@ -31,14 +31,14 @@ class MySqlKeyValueDao[F[_], K, V: TypeTag](tableName: String,
         """.stripMargin
       ).update
 
-  private def getSql(key: String) =
+  private def getSql(key: K) =
     (Fragment.const(s"SELECT value FROM $tableName") ++ fr"WHERE id = $key;").query[V]
 
   override def put(key: K, value: V): F[Unit] =
     putSql(key, value).run.transact(transactor).void
 
   override def get(key: K): F[Option[V]] =
-    getSql(keySchema.codec.write(key))
+    getSql(key)
       .option
       .transact(transactor)
 }
