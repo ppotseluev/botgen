@@ -2,7 +2,7 @@ package botgen.bot
 
 import botgen.bot.Bot.FallbackPolicy
 import botgen.bot.BotDsl.{BotScript, getCurrentState, loadScenario, raiseError, reply, saveState}
-import botgen.bot.scenario.Scenario
+import botgen.bot.scenario.GraphBotScenario
 import botgen.model.{Message, Request}
 import cats.syntax.applicative._
 
@@ -17,7 +17,7 @@ class Bot(fallbackPolicy: FallbackPolicy) {
     }
 
   private def process(request: Request.ProcessMessage,
-                      scenario: Scenario): BotScript[Unit] = {
+                      scenario: GraphBotScenario): BotScript[Unit] = {
     val Request.ProcessMessage(_, Message(chatId, payload)) = request
     for {
       currentStateId <- getCurrentState(chatId).map(_.getOrElse(scenario.startFrom))

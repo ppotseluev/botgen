@@ -5,6 +5,7 @@ import cats.effect.Bracket
 import cats.instances.string._
 import cats.syntax.functor._
 import doobie.implicits._
+import doobie.util.fragment.Fragment
 import doobie.util.transactor.Transactor
 import doobie.{Get, Put}
 import io.circe._
@@ -21,31 +22,23 @@ class MySqlKeyValueDao[F[_], K, V: TypeTag](tableName: String,
   import MySqlKeyValueDao._
 
   private def putSql(key: K, value: V): doobie.Update0 =
-    sql"""
-         |INSERT INTO $tableName (
-         |  id,
-         |  value
-         |) VALUES (
-         |  $key,
-         |  $value
-         |) AS new(k, v)
-         | ON DUPLICATE KEY UPDATE
-         | value = v;
+    (Fragment.const(s"INSERT INTO $tableName (id, value)") ++
+      fr"""|VALUES (
+           |  $key,
+           |  $value
+           |) ON DUPLICATE KEY UPDATE
+           |value = $value;
         """.stripMargin
-      .update
+      ).update
 
-  private def getSql(key: K) =
-    sql"""
-         |SELECT value FROM $tableName
-         |WHERE id = $key;
-       """.stripMargin
-      .query[V]
+  private def getSql(key: String) =
+    (Fragment.const(s"SELECT value FROM $tableName") ++ fr"WHERE id = $key;").query[V]
 
   override def put(key: K, value: V): F[Unit] =
     putSql(key, value).run.transact(transactor).void
 
   override def get(key: K): F[Option[V]] =
-    getSql(key)
+    getSql(keySchema.codec.write(key))
       .option
       .transact(transactor)
 }

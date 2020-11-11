@@ -11,6 +11,8 @@ object Dependency {
   val logbackVersion = "1.2.3"
   val sttpClientVersion = "2.2.9"
   val doobieVersion = "0.9.2"
+  val mysqlConnectorVersion = "8.0.22"
+
 
   val kindProjector = "org.typelevel" %% "kind-projector" % kindProjectorVersion cross CrossVersion.full
 
@@ -28,6 +30,8 @@ object Dependency {
   val logback = "ch.qos.logback" % "logback-classic" % logbackVersion
   val sttpClientCore = "com.softwaremill.sttp.client" %% "core" % sttpClientVersion
   val sttpClientCirce = "com.softwaremill.sttp.client" %% "circe" % sttpClientVersion
+  val sttpClientCatsBackend = "com.softwaremill.sttp.client" %% "async-http-client-backend-cats" % sttpClientVersion
   val sttpClientHttp4sBackend = "com.softwaremill.sttp.client" %% "http4s-backend" % sttpClientVersion
   val doobieCore = "org.tpolecat" %% "doobie-core" % doobieVersion
+  val mysqlConnector = "mysql" % "mysql-connector-java" % mysqlConnectorVersion
 }

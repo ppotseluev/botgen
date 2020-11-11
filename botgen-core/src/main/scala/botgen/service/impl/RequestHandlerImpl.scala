@@ -1,12 +1,12 @@
 package botgen.service.impl
 
-import botgen.bot.BotDsl.BotScript
+import botgen.bot.BotLogic
 import botgen.compiler.BotCompiler
 import botgen.model.Request
 import botgen.service.RequestHandler
 import cats.Monad
 
-class RequestHandlerImpl[F[_] : Monad](botLogic: Request.ProcessMessage => BotScript[Unit],
+class RequestHandlerImpl[F[_] : Monad](botLogic: BotLogic,
                                        botCompiler: BotCompiler[F])
   extends RequestHandler[F] {
 

@@ -1,6 +1,6 @@
 package botgen.bot
 
-import botgen.bot.scenario.Scenario
+import botgen.bot.scenario.GraphBotScenario
 import botgen.model._
 import cats.free.Free
 import cats.free.Free.liftF
@@ -13,7 +13,7 @@ object BotDsl {
    */
   type BotScript[T] = Free[BotDsl, T]
 
-  case class LoadScenario(botKey: BotKey) extends BotDsl[Option[Scenario]]
+  case class LoadScenario(botKey: BotKey) extends BotDsl[Option[GraphBotScenario]]
 
   case class GetCurrentState(chatId: ChatId) extends BotDsl[Option[BotStateId]]
 
@@ -23,7 +23,7 @@ object BotDsl {
 
   case class RaiseError(botError: BotError) extends BotDsl[Unit]
 
-  def loadScenario(botKey: BotKey): BotScript[Option[Scenario]] =
+  def loadScenario(botKey: BotKey): BotScript[Option[GraphBotScenario]] =
     liftF(LoadScenario(botKey))
 
   def getCurrentState(chatId: ChatId): BotScript[Option[BotStateId]] =

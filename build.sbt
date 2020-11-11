@@ -18,7 +18,13 @@ lazy val settings = Seq(
     "-Xfatal-warnings",
     "-deprecation"
   ),
-  addCompilerPlugin(Dependency.kindProjector)
+  addCompilerPlugin(Dependency.kindProjector),
+  assemblyMergeStrategy in assembly := {
+    case x if x.contains("io.netty.versions.properties") => MergeStrategy.concat
+    case x =>
+      val oldStrategy = (assemblyMergeStrategy in assembly).value
+      oldStrategy(x)
+  }
 )
 
 lazy val root = project
@@ -67,6 +73,16 @@ lazy val `botgen-core` = project
     )
   ).dependsOn(`botgen-bot`)
 
+lazy val `botgen-server` = project
+  .settings(
+    name := "botgen-server",
+    settings,
+    libraryDependencies ++= Seq(
+      Dependency.sttpClientCatsBackend,
+      Dependency.mysqlConnector
+    )
+  ).dependsOn(`botgen-core`)
+
 lazy val `botgen-api` = project
   .settings(
     name := "botgen-api",
@@ -79,4 +95,4 @@ lazy val `botgen-api` = project
       Dependency.scalaLogging,
       Dependency.logback
     )
-  ).dependsOn(`botgen-core`)
+  ).dependsOn(`botgen-server`)

@@ -10,8 +10,7 @@ import scalax.collection.edge.LDiEdge
 
 
 class GraphBotScenario(val graph: BotGraph,
-                       override val startFrom: BotStateId)
-  extends Scenario {
+                       val startFrom: BotStateId) {
 
   import GraphBotScenario.EdgeImplicits._
 
@@ -37,7 +36,7 @@ class GraphBotScenario(val graph: BotGraph,
                        (edge: graph.EdgeT): Boolean =
     Matcher.isMatched(command)(edge.expectedInputPredicate)
 
-  override def transit(stateId: BotStateId,
+  def transit(stateId: BotStateId,
                        command: Message.Payload): Option[BotState] =
     states
       .get(stateId)
@@ -45,7 +44,7 @@ class GraphBotScenario(val graph: BotGraph,
       .map(_.to)
       .map(toBotState)
 
-  override def get(stateId: BotStateId): Option[BotState] =
+  def get(stateId: BotStateId): Option[BotState] =
     states
       .get(stateId)
       .map(toBotState)
