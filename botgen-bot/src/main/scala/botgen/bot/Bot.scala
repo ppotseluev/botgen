@@ -1,28 +1,30 @@
 package botgen.bot
 
 import botgen.bot.Bot.FallbackPolicy
-import botgen.bot.BotDsl.{BotScript, getCurrentState, loadScenario, raiseError, reply, saveState}
+import botgen.bot.BotDsl._
 import botgen.bot.scenario.GraphBotScenario
-import botgen.model.{Message, Request}
+import botgen.model.Message
 import cats.syntax.applicative._
 
 /**
  * Describes bot logic using [[BotDsl]]
  */
-class Bot(fallbackPolicy: FallbackPolicy) {
-  def process(request: Request.ProcessMessage): BotScript[Unit] =
-    loadScenario(request.botKey).flatMap {
-      case Some(scenario) => process(request, scenario)
+class Bot(fallbackPolicy: FallbackPolicy)
+  extends BotLogic {
+
+  override def apply(botInput: BotInput): BotScript[Unit] =
+    loadScenario(botInput.botKey).flatMap {
+      case Some(scenario) => process(botInput, scenario)
       case None => raiseError(BotError.ScenarioNotFound)
     }
 
-  private def process(request: Request.ProcessMessage,
+  private def process(botInput: BotInput,
                       scenario: GraphBotScenario): BotScript[Unit] = {
-    val Request.ProcessMessage(_, Message(chatId, payload)) = request
+    val BotInput(_, Message(chatId, payload)) = botInput
     for {
       currentStateId <- getCurrentState(chatId).map(_.getOrElse(scenario.startFrom))
       _ <- scenario.transit(currentStateId, payload) match {
-        case Some(newState) => process(request, newState)
+        case Some(newState) => process(botInput, newState)
         case None => fallbackPolicy match {
           case FallbackPolicy.Ignore => ().pure[BotScript]
         }
@@ -30,13 +32,13 @@ class Bot(fallbackPolicy: FallbackPolicy) {
     } yield ()
   }
 
-  private def process(request: Request.ProcessMessage,
+  private def process(botInput: BotInput,
                       newState: BotState): BotScript[Unit] = for {
-    _ <- saveState(request.message.chatId, newState.id)
+    _ <- saveState(botInput.message.chatId, newState.id)
     _ <- newState.action match {
       case Action.Reply(text) =>
         val payload = Message.Payload(text, newState.availableCommands)
-        reply(request.botToken, request.message.chatId, payload)
+        reply(botInput.botToken, botInput.message.chatId, payload)
     }
   } yield ()
 }

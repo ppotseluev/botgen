@@ -26,6 +26,9 @@ object Dependency {
   val tapirCore = "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion
   val tapirJsonCirce = "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % tapirVersion
   val tapirHttp4s = "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % tapirVersion
+  val tapirSwaggerUi = "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-http4s" % tapirVersion
+  val tapirOpenapiDocs = "com.softwaremill.sttp.tapir" %% "tapir-openapi-docs" % tapirVersion
+  val tapirOpenapiCirceYaml = "com.softwaremill.sttp.tapir" %% "tapir-openapi-circe-yaml" % tapirVersion
   val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion
   val logback = "ch.qos.logback" % "logback-classic" % logbackVersion
   val sttpClientCore = "com.softwaremill.sttp.client" %% "core" % sttpClientVersion

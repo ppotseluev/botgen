@@ -8,6 +8,8 @@ import io.circe.generic.semiauto.deriveCodec
 
 trait TelegramClient[F[_]] {
   def send(botToken: BotToken)(messageSource: MessageSource): F[Unit]
+
+  def setWebhook(botToken: BotToken, url: String): F[Unit]
 }
 
 object TelegramClient {

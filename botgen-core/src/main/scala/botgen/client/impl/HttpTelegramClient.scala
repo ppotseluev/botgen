@@ -28,4 +28,11 @@ class HttpTelegramClient[F[_]](telegramAddress: String)
       .checkStatusCode()
       .void
   }
+
+  override def setWebhook(botToken: BotToken, url: String): F[Unit] =
+    basicRequest
+      .get(uri"https://$telegramAddress/bot$botToken/setWebhook?url=$url")
+      .send()
+      .checkStatusCode()
+      .void
 }

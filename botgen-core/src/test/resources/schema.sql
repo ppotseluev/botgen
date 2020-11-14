@@ -2,3 +2,8 @@ CREATE TABLE states (
   `id` VARCHAR(10) NOT NULL PRIMARY KEY,
   `value` JSON
 );
+
+CREATE TABLE bots (
+  `id` VARCHAR(64) NOT NULL PRIMARY KEY,
+  `value` JSON
+);

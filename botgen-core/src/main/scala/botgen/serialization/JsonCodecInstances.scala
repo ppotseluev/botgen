@@ -3,14 +3,14 @@ package botgen.serialization
 import botgen.bot.Action
 import botgen.bot.scenario.GraphBotScenario.Node
 import botgen.bot.scenario.{ExpectedInputPredicate, GraphBotScenario}
-import botgen.model.{BotCommand, BotInfo, BotStateId, Message, Tags}
+import botgen.model._
 import botgen.serialization.GraphBotScenarioView.Edge
 import botgen.utils.CirceUtils._
 import cats.syntax.invariant._
 import com.softwaremill.tagging._
-import io.circe.Encoder._
-import io.circe.Decoder._
 import io.circe.Codec
+import io.circe.Decoder._
+import io.circe.Encoder._
 import io.circe.generic.semiauto._
 
 object JsonCodecInstances {
@@ -42,4 +42,6 @@ object JsonCodecInstances {
   }
 
   implicit val botInfoCodec: Codec[BotInfo] = deriveCodec
+
+  implicit val botDefinitionCodec: Codec[BotDefinition] = deriveCodec
 }

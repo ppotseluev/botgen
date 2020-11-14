@@ -1,9 +1,8 @@
 package botgen
 
-import botgen.bot.scenario.GraphBotScenario
-import botgen.model.{BotInfo, BotKey, ChatId}
+import botgen.model.{BotDefinition, BotInfo, BotKey, ChatId}
 
 package object dao {
-  type BotScenarioDao[F[_]] = KeyValueDao[F, BotKey, GraphBotScenario]
+  type BotDefinitionDao[F[_]] = KeyValueDao[F, BotKey, BotDefinition]
   type BotStateDao[F[_]] = KeyValueDao[F, ChatId, BotInfo]
 }

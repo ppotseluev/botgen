@@ -21,6 +21,7 @@ lazy val settings = Seq(
   addCompilerPlugin(Dependency.kindProjector),
   assemblyMergeStrategy in assembly := {
     case x if x.contains("io.netty.versions.properties") => MergeStrategy.concat
+    case PathList(ps@_*) if ps.last endsWith "pom.properties" => MergeStrategy.first
     case x =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)
@@ -92,6 +93,9 @@ lazy val `botgen-api` = project
       Dependency.tapirCore,
       Dependency.tapirJsonCirce,
       Dependency.tapirHttp4s,
+      Dependency.tapirSwaggerUi,
+      Dependency.tapirOpenapiDocs,
+      Dependency.tapirOpenapiCirceYaml,
       Dependency.scalaLogging,
       Dependency.logback
     )

@@ -1,17 +1,33 @@
 package botgen.service.impl
 
-import botgen.bot.BotLogic
+import botgen.bot.{BotInput, BotLogic}
+import botgen.client.TelegramClient
 import botgen.compiler.BotCompiler
-import botgen.model.Request
+import botgen.dao.BotDefinitionDao
+import botgen.model.{BotToken, Request, Tags}
 import botgen.service.RequestHandler
 import cats.Monad
+import cats.syntax.flatMap._
+import cats.syntax.functor._
 
 class RequestHandlerImpl[F[_] : Monad](botLogic: BotLogic,
-                                       botCompiler: BotCompiler[F])
+                                       botCompiler: BotCompiler[F],
+                                       botDefinitionDao: BotDefinitionDao[F],
+                                       telegramClient: TelegramClient[F],
+                                       webhookUrl: BotToken => String)
   extends RequestHandler[F] {
 
-  override def handle(request: Request): F[Unit] = request match {
-    case processMessageRequest: Request.ProcessMessage =>
-      botLogic(processMessageRequest).foldMap(botCompiler)
+  override def handle[T](request: Request[T]): F[T] = request match {
+    case Request.ProcessMessage(botToken, message) =>
+      val botInput = BotInput(botToken, message)
+      botLogic(botInput).foldMap(botCompiler)
+    case Request.UpsertBot(botToken, botDefinition) =>
+      //TODO set webhook? only on creation?
+      for {
+        _ <- botDefinitionDao.put(botToken.taggedWith[Tags.BotKey], botDefinition) //TODO hash token
+        _ <- telegramClient.setWebhook(botToken, webhookUrl(botToken))
+      } yield ()
+    case Request.GetBot(botKey) =>
+      botDefinitionDao.get(botKey)
   }
 }

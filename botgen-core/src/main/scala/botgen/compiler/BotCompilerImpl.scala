@@ -1,14 +1,14 @@
 package botgen.compiler
 
 import botgen.bot.{BotDsl, BotError}
-import botgen.dao.{BotScenarioDao, BotStateDao}
+import botgen.dao.{BotDefinitionDao, BotStateDao}
 import botgen.model.BotInfo
 import botgen.service.ChatService
 import cats.ApplicativeError
 import cats.syntax.applicativeError._
 import cats.syntax.functor._
 
-class BotCompilerImpl[F[_]](botScenarioDao: BotScenarioDao[F],
+class BotCompilerImpl[F[_]](botDefinitionDao: BotDefinitionDao[F],
                             botStateDao: BotStateDao[F],
                             chatService: ChatService[F])
                            (implicit F: ApplicativeError[F, Throwable])
@@ -16,7 +16,7 @@ class BotCompilerImpl[F[_]](botScenarioDao: BotScenarioDao[F],
 
   override def apply[A](botDsl: BotDsl[A]): F[A] = botDsl match {
     case BotDsl.LoadScenario(botKey) =>
-      botScenarioDao.get(botKey)
+      botDefinitionDao.get(botKey).map(_.map(_.scenario))
     case BotDsl.GetCurrentState(chatId) =>
       botStateDao.get(chatId).map(_.map(_.botStateId))
     case BotDsl.SaveState(chatId, botStateId) =>

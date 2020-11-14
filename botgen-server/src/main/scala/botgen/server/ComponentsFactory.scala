@@ -1,13 +1,12 @@
 package botgen.server
 
-import botgen.bot.scenario.GraphBotScenario
 import botgen.bot.{Bot, BotLogic}
 import botgen.client.TelegramClient
 import botgen.client.impl.HttpTelegramClient
 import botgen.compiler.{BotCompiler, BotCompilerImpl}
 import botgen.dao.impl.MySqlKeyValueDao
-import botgen.dao.{BotScenarioDao, BotStateDao, Schema}
-import botgen.model.{BotInfo, BotKey, ChatId}
+import botgen.dao.{BotDefinitionDao, BotStateDao, Schema}
+import botgen.model.{BotDefinition, BotInfo, BotKey, BotToken, ChatId}
 import botgen.serialization.JsonCodecInstances._
 import botgen.serialization.StringCodecInstances._
 import botgen.server.config.MySqlConfig
@@ -23,8 +22,11 @@ import sttp.client.asynchttpclient.cats.AsyncHttpClientCatsBackend
 class ComponentsFactory { //TODO add logging
 
   def requestHandler[F[_] : Monad](botLogic: BotLogic,
-                                   botCompiler: BotCompiler[F]): RequestHandler[F] =
-    new RequestHandlerImpl[F](botLogic, botCompiler)
+                                   botCompiler: BotCompiler[F],
+                                   botDefinitionDao: BotDefinitionDao[F],
+                                   telegramClient: TelegramClient[F],
+                                   webhookUrl: BotToken => String): RequestHandler[F] =
+    new RequestHandlerImpl[F](botLogic, botCompiler, botDefinitionDao, telegramClient, webhookUrl)
 
   def telegramClient[F[_] : Concurrent](telegramAddress: String)
                                        (implicit cs: ContextShift[F]): Resource[F, TelegramClient[F]] =
@@ -33,21 +35,21 @@ class ComponentsFactory { //TODO add logging
   def chatService[F[_]](telegramClient: TelegramClient[F]): ChatService[F] =
     new TelegramChatService[F](telegramClient)
 
-  def botCompiler[F[_]](botScenarioDao: BotScenarioDao[F],
+  def botCompiler[F[_]](botDefinitionDao: BotDefinitionDao[F],
                         botStateDao: BotStateDao[F],
                         chatService: ChatService[F])
                        (implicit F: ApplicativeError[F, Throwable]): BotCompiler[F] =
-    new BotCompilerImpl[F](botScenarioDao, botStateDao, chatService)
+    new BotCompilerImpl[F](botDefinitionDao, botStateDao, chatService)
 
   def botLogic(botFallbackPolicy: Bot.FallbackPolicy): BotLogic =
-    new Bot(botFallbackPolicy).process
+    new Bot(botFallbackPolicy)
 
-  def newMysqlBotScenarioDao[F[_] : Async](mySqlConfig: MySqlConfig,
-                                           blocker: Blocker,
-                                           tableName: String = "bots")
-                                          (implicit cs: ContextShift[F]): BotScenarioDao[F] = {
+  def newMysqlBotDefinitionDao[F[_] : Async](mySqlConfig: MySqlConfig,
+                                             blocker: Blocker,
+                                             tableName: String = "bots")
+                                            (implicit cs: ContextShift[F]): BotDefinitionDao[F] = {
     implicit val keySchema: Schema.String[BotKey] = Schema.String(implicitly)
-    implicit val scenarioSchema: Schema[GraphBotScenario] = Schema.Json(implicitly)
+    implicit val scenarioSchema: Schema[BotDefinition] = Schema.Json(implicitly)
     new MySqlKeyValueDao(tableName, transactor(mySqlConfig, blocker))
   }
 
@@ -60,11 +62,11 @@ class ComponentsFactory { //TODO add logging
     new MySqlKeyValueDao(tableName, transactor(mySqlConfig, blocker))
   }
 
-  private def transactor[F[_]: Async](mySqlConfig: MySqlConfig,
-                                   blocker: Blocker)
-                                  (implicit cs: ContextShift[F]) =
+  private def transactor[F[_] : Async](mySqlConfig: MySqlConfig,
+                                       blocker: Blocker)
+                                      (implicit cs: ContextShift[F]) =
     Transactor.fromDriverManager[F](
-      "com.mysql.jdbc.Driver",
+      "com.mysql.cj.jdbc.Driver",
       mySqlConfig.url,
       mySqlConfig.user,
       mySqlConfig.password,
