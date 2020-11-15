@@ -6,20 +6,20 @@ import botgen.client.impl.HttpTelegramClient
 import botgen.compiler.{BotCompiler, BotCompilerImpl}
 import botgen.dao.impl.MySqlKeyValueDao
 import botgen.dao.{BotDefinitionDao, BotStateDao, Schema}
-import botgen.model.{BotDefinition, BotInfo, BotKey, BotToken, ChatId, Tags}
+import botgen.model._
 import botgen.serialization.JsonCodecInstances._
 import botgen.serialization.StringCodecInstances._
 import botgen.server.config.{HttpClientConfig, MySqlConfig}
 import botgen.service.impl.{RequestHandlerImpl, TelegramChatService}
 import botgen.service.{ChatService, RequestHandler}
-import cats.effect.{Async, Blocker, Concurrent, ContextShift, Resource}
+import cats.effect.{Async, Concurrent, ContextShift, Resource}
 import cats.{ApplicativeError, Monad}
+import com.github.t3hnar.bcrypt._
+import com.softwaremill.tagging._
 import doobie.util.transactor.Transactor
 import sttp.client.SttpBackend
 import sttp.client.asynchttpclient.WebSocketHandler
 import sttp.client.asynchttpclient.cats.AsyncHttpClientCatsBackend
-import com.github.t3hnar.bcrypt._
-import com.softwaremill.tagging._
 
 
 object ComponentsFactory { //TODO add logging
@@ -53,32 +53,28 @@ object ComponentsFactory { //TODO add logging
     new Bot(botFallbackPolicy)
 
   def mysqlBotDefinitionDao[F[_] : Async](mySqlConfig: MySqlConfig,
-                                          blocker: Blocker,
                                           tableName: String = "bots")
                                          (implicit cs: ContextShift[F]): BotDefinitionDao[F] = {
     implicit val keySchema: Schema.String[BotKey] = Schema.String(implicitly)
     implicit val scenarioSchema: Schema[BotDefinition] = Schema.Json(implicitly)
-    new MySqlKeyValueDao(tableName, transactor(mySqlConfig, blocker))
+    new MySqlKeyValueDao(tableName, transactor(mySqlConfig))
   }
 
   def mysqlBotStateDao[F[_] : Async](mySqlConfig: MySqlConfig,
-                                     blocker: Blocker,
                                      tableName: String = "states")
                                     (implicit cs: ContextShift[F]): BotStateDao[F] = {
     implicit val keySchema: Schema.String[ChatId] = Schema.String(implicitly)
     implicit val scenarioSchema: Schema[BotInfo] = Schema.Json(implicitly)
-    new MySqlKeyValueDao(tableName, transactor(mySqlConfig, blocker))
+    new MySqlKeyValueDao(tableName, transactor(mySqlConfig))
   }
 
-  private def transactor[F[_] : Async](mySqlConfig: MySqlConfig,
-                                       blocker: Blocker)
+  private def transactor[F[_] : Async](mySqlConfig: MySqlConfig)
                                       (implicit cs: ContextShift[F]) =
     Transactor.fromDriverManager[F](
       "com.mysql.cj.jdbc.Driver",
       mySqlConfig.url,
       mySqlConfig.user,
-      mySqlConfig.password,
-      blocker
+      mySqlConfig.password
     )
 
   private def createHttpClient[F[_] : Concurrent, C](create: SttpBackend[F, Nothing, WebSocketHandler] => C)
