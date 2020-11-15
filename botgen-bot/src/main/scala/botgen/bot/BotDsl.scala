@@ -15,9 +15,9 @@ object BotDsl {
 
   case class LoadScenario(botToken: BotToken) extends BotDsl[Option[GraphBotScenario]]
 
-  case class GetCurrentState(chatId: ChatId) extends BotDsl[Option[BotStateId]]
+  case class GetCurrentState(chatId: ChatId, botToken: BotToken) extends BotDsl[Option[BotStateId]]
 
-  case class SaveState(chatId: ChatId, botStateId: BotStateId) extends BotDsl[Unit]
+  case class SaveState(chatId: ChatId, botToken: BotToken, botStateId: BotStateId) extends BotDsl[Unit]
 
   case class Reply(botToken: BotToken, chatId: ChatId, message: Message.Payload) extends BotDsl[Unit]
 
@@ -26,11 +26,11 @@ object BotDsl {
   def loadScenario(botToken: BotToken): BotScript[Option[GraphBotScenario]] =
     liftF(LoadScenario(botToken))
 
-  def getCurrentState(chatId: ChatId): BotScript[Option[BotStateId]] =
-    liftF(GetCurrentState(chatId))
+  def getCurrentState(chatId: ChatId, botToken: BotToken): BotScript[Option[BotStateId]] =
+    liftF(GetCurrentState(chatId, botToken))
 
-  def saveState(chatId: ChatId, botStateId: BotStateId): BotScript[Unit] =
-    liftF(SaveState(chatId, botStateId))
+  def saveState(chatId: ChatId, botToken: BotToken, botStateId: BotStateId): BotScript[Unit] =
+    liftF(SaveState(chatId, botToken, botStateId))
 
   def reply(botToken: BotToken, chatId: ChatId, message: Message.Payload): BotScript[Unit] =
     liftF(Reply(botToken, chatId, message))

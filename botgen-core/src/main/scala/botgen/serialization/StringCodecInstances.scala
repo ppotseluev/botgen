@@ -14,6 +14,17 @@ object StringCodecInstances {
   implicit val botKeyStringCodec: StringCodec[BotKey] =
     StringCodec[String].imap(_.taggedWith[Tags.BotKey])(identity)
 
-  implicit val chatIdStringCodec: StringCodec[ChatId] =
-    StringCodec[String].imap(_.taggedWith[Tags.ChatId])(identity)
+  private val chatIdBotKeyRegex = "([a-zA-Z0-9]+)_(\\S+)".r
+
+  implicit val chatIdBotKeyCodec: StringCodec[(ChatId, BotKey)] =
+    StringCodec.from(
+      encoder = {
+        case (chatId, botKey) => s"${chatId}_$botKey"
+      },
+      decoder = {
+        case chatIdBotKeyRegex(chatId, botKey) =>
+          Right(chatId.taggedWith[Tags.ChatId] -> botKey.taggedWith[Tags.BotKey])
+        case _ => Left(s"String should match $chatIdBotKeyRegex")
+      }
+    )
 }

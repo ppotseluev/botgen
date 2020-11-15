@@ -63,7 +63,7 @@ object ComponentsFactory { //TODO add logging
   def mysqlBotStateDao[F[_] : Async](mySqlConfig: MySqlConfig,
                                      tableName: String = "states")
                                     (implicit cs: ContextShift[F]): BotStateDao[F] = {
-    implicit val keySchema: Schema.String[ChatId] = Schema.String(implicitly)
+    implicit val keySchema: Schema.String[(ChatId, BotKey)] = Schema.String(implicitly)
     implicit val scenarioSchema: Schema[BotInfo] = Schema.Json(implicitly)
     new MySqlKeyValueDao(tableName, transactor(mySqlConfig))
   }

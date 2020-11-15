@@ -20,9 +20,9 @@ class Bot(fallbackPolicy: FallbackPolicy)
 
   private def process(botInput: BotInput,
                       scenario: GraphBotScenario): BotScript[Unit] = {
-    val BotInput(_, Message(chatId, payload)) = botInput
+    val BotInput(token, Message(chatId, payload)) = botInput
     for {
-      currentStateId <- getCurrentState(chatId).map(_.getOrElse(scenario.startFrom))
+      currentStateId <- getCurrentState(chatId, token).map(_.getOrElse(scenario.startFrom))
       _ <- scenario.transit(currentStateId, payload) match {
         case Some(newState) => process(botInput, newState)
         case None => fallbackPolicy match {
@@ -34,7 +34,7 @@ class Bot(fallbackPolicy: FallbackPolicy)
 
   private def process(botInput: BotInput,
                       newState: BotState): BotScript[Unit] = for {
-    _ <- saveState(botInput.message.chatId, newState.id)
+    _ <- saveState(botInput.message.chatId, botInput.botToken, newState.id)
     _ <- newState.action match {
       case Action.Reply(text) =>
         val payload = Message.Payload(text, newState.availableCommands)
