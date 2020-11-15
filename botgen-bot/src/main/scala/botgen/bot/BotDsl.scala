@@ -13,7 +13,7 @@ object BotDsl {
    */
   type BotScript[T] = Free[BotDsl, T]
 
-  case class LoadScenario(botKey: BotKey) extends BotDsl[Option[GraphBotScenario]]
+  case class LoadScenario(botToken: BotToken) extends BotDsl[Option[GraphBotScenario]]
 
   case class GetCurrentState(chatId: ChatId) extends BotDsl[Option[BotStateId]]
 
@@ -23,8 +23,8 @@ object BotDsl {
 
   case class RaiseError(botError: BotError) extends BotDsl[Unit]
 
-  def loadScenario(botKey: BotKey): BotScript[Option[GraphBotScenario]] =
-    liftF(LoadScenario(botKey))
+  def loadScenario(botToken: BotToken): BotScript[Option[GraphBotScenario]] =
+    liftF(LoadScenario(botToken))
 
   def getCurrentState(chatId: ChatId): BotScript[Option[BotStateId]] =
     liftF(GetCurrentState(chatId))

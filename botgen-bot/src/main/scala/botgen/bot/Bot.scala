@@ -13,7 +13,7 @@ class Bot(fallbackPolicy: FallbackPolicy)
   extends BotLogic {
 
   override def apply(botInput: BotInput): BotScript[Unit] =
-    loadScenario(botInput.botKey).flatMap {
+    loadScenario(botInput.botToken).flatMap {
       case Some(scenario) => process(botInput, scenario)
       case None => raiseError(BotError.ScenarioNotFound)
     }

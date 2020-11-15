@@ -1,10 +1,6 @@
 package botgen.bot
 
-import botgen.model.{BotKey, BotToken, Message, Tags}
+import botgen.model.{BotToken, Message}
 
 case class BotInput(botToken: BotToken,
-                    message: Message) {
-
-  //  FIXME remove ?
-  def botKey: BotKey = botToken.taggedWith[Tags.BotKey] //TODO hash botToken
-}
+                    message: Message)

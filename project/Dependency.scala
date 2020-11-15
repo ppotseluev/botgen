@@ -12,10 +12,11 @@ object Dependency {
   val sttpClientVersion = "2.2.9"
   val doobieVersion = "0.9.2"
   val mysqlConnectorVersion = "8.0.22"
-
+  val typesafeConfigVersion = "1.4.1"
+  val ficusVersion = "1.5.0"
+  val scalaBcryptVersion = "4.3.0"
 
   val kindProjector = "org.typelevel" %% "kind-projector" % kindProjectorVersion cross CrossVersion.full
-
   val tagging = "com.softwaremill.common" %% "tagging" % taggingVersion
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
   val catsFree = "org.typelevel" %% "cats-free" % catsVersion
@@ -37,4 +38,7 @@ object Dependency {
   val sttpClientHttp4sBackend = "com.softwaremill.sttp.client" %% "http4s-backend" % sttpClientVersion
   val doobieCore = "org.tpolecat" %% "doobie-core" % doobieVersion
   val mysqlConnector = "mysql" % "mysql-connector-java" % mysqlConnectorVersion
+  val typesafeConfig = "com.typesafe" % "config" % typesafeConfigVersion
+  val ficus = "com.iheart" %% "ficus" % ficusVersion
+  val scalaBcrypt = "com.github.t3hnar" %% "scala-bcrypt" % scalaBcryptVersion
 }

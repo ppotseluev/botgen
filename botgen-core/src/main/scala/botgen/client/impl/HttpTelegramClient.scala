@@ -10,7 +10,7 @@ import io.circe.syntax._
 import sttp.client._
 import sttp.model.{Header, MediaType}
 
-class HttpTelegramClient[F[_]](telegramAddress: String)
+class HttpTelegramClient[F[_]](telegramUrl: String)
                               (implicit sttpBackend: SttpBackend[F, Nothing, NothingT],
                                F: MonadError[F, Throwable])
   extends TelegramClient[F] {
@@ -21,7 +21,7 @@ class HttpTelegramClient[F[_]](telegramAddress: String)
       .copy(dropNullValues = true)
       .print(messageSource.asJson)
     basicRequest
-      .post(uri"https://$telegramAddress/bot$botToken/sendMessage")
+      .post(uri"$telegramUrl/bot$botToken/sendMessage")
       .header(Header.contentType(MediaType.ApplicationJson))
       .body(json)
       .send()
@@ -31,7 +31,7 @@ class HttpTelegramClient[F[_]](telegramAddress: String)
 
   override def setWebhook(botToken: BotToken, url: String): F[Unit] =
     basicRequest
-      .get(uri"https://$telegramAddress/bot$botToken/setWebhook?url=$url")
+      .get(uri"$telegramUrl/bot$botToken/setWebhook?url=$url")
       .send()
       .checkStatusCode()
       .void

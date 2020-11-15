@@ -25,4 +25,7 @@ class TelegramChatService[F[_]](telegramClient: TelegramClient[F])
         .map(Seq(_))
       ReplyMarkup(keyboard = Some(buttons))
     }
+
+  override def setWebhook(botToken: BotToken, url: String): F[Unit] =
+    telegramClient.setWebhook(botToken, url)
 }

@@ -80,7 +80,10 @@ lazy val `botgen-server` = project
     settings,
     libraryDependencies ++= Seq(
       Dependency.sttpClientCatsBackend,
-      Dependency.mysqlConnector
+      Dependency.mysqlConnector,
+      Dependency.typesafeConfig,
+      Dependency.ficus,
+      Dependency.scalaBcrypt
     )
   ).dependsOn(`botgen-core`)
 
