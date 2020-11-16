@@ -1,5 +1,6 @@
 package botgen.server
 
+import botgen.bot.Bot.FallbackPolicy.Ignore
 import botgen.bot.{Bot, BotLogic}
 import botgen.client.TelegramClient
 import botgen.client.impl.HttpTelegramClient
@@ -22,7 +23,7 @@ import sttp.client.asynchttpclient.WebSocketHandler
 import sttp.client.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 
-object ComponentsFactory { //TODO add logging
+object ComponentsFactory { //TODO add logging for some components
 
   def keyCalculator(salt: String)(token: BotToken): BotKey =
     token.bcryptBounded(salt).taggedWith[Tags.BotKey]
@@ -49,8 +50,7 @@ object ComponentsFactory { //TODO add logging
                        (implicit F: ApplicativeError[F, Throwable]): BotCompiler[F] =
     new BotCompilerImpl[F](botDefinitionDao, botStateDao, chatService, toKey)
 
-  def botLogic(botFallbackPolicy: Bot.FallbackPolicy): BotLogic =
-    new Bot(botFallbackPolicy)
+  lazy val botLogic: BotLogic = new Bot(fallbackPolicy = Ignore)
 
   def mysqlBotDefinitionDao[F[_] : Async](mySqlConfig: MySqlConfig,
                                           tableName: String = "bots")

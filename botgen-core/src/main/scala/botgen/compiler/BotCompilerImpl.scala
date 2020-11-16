@@ -27,7 +27,7 @@ class BotCompilerImpl[F[_]](botDefinitionDao: BotDefinitionDao[F],
     case BotDsl.RaiseError(botError) =>
       botError match {
         case BotError.ScenarioNotFound =>
-          //TODO improve error handling
+          //TODO improve error handling, introduce typed errors
           new NoSuchElementException("No such bot").raiseError
       }
   }
