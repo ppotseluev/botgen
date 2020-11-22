@@ -2,7 +2,6 @@ FROM parrotstream/ubuntu-java:xenial-8
 
 ARG KEYSTORE_PASS
 ARG KEY_PASS
-ARG XMX
 
 COPY target/scala-2.13/botgen-api-assembly-1.0-SNAPSHOT.jar .
 COPY cert/server.p12 server.p12
