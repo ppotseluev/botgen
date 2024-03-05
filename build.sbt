@@ -5,6 +5,8 @@ resolvers ++= Seq(
   DefaultMavenRepository
 )
 
+val repsy = "Repsy Managed Repository" at "https://repo.repsy.io/mvn/ppotseluev/default"
+
 lazy val settings = Seq(
   organization := "com.github.ppotseluev",
   version := "1.0-SNAPSHOT",
@@ -18,6 +20,13 @@ lazy val settings = Seq(
     "-Xfatal-warnings",
     "-deprecation"
   ),
+  ThisBuild / publishTo := Some(repsy),
+  ThisBuild / credentials += Credentials(
+    "Repsy Managed Repository",
+    "repo.repsy.io", "ppotseluev",
+    sys.env.getOrElse("REPSY_PWD", "UNDEFINED")
+  ),
+  ThisBuild / resolvers ++= List(Resolver.mavenLocal, repsy),
   addCompilerPlugin(Dependency.kindProjector),
   assemblyMergeStrategy in assembly := {
     case x if x.contains("io.netty.versions.properties") => MergeStrategy.concat
